@@ -45,7 +45,7 @@ function App() {
   return (
     <HelmetProvider>
       <div 
-        className="bg-boreal-dark text-white min-h-screen flex flex-col"
+        className="bg-boreal-dark text-white min-h-screen w-full flex flex-col overflow-x-hidden"
         style={{ fontFamily: "'Montserrat', sans-serif" }}
       >
         <Helmet>
@@ -62,11 +62,13 @@ function App() {
           `}</style>
         </Helmet>
         
-        <AppNavbar
-          user={user}
-          activeTab={activeTab}
-          onNavigate={(key) => setActiveTab(key)}
-        />
+        {user && (
+          <AppNavbar
+            user={user}
+            activeTab={activeTab}
+            onNavigate={(key) => setActiveTab(key)}
+          />
+        )}
 
         <main className="flex-grow flex flex-col items-center w-full">
           <AnimatePresence mode="wait">
@@ -103,16 +105,34 @@ function App() {
             )}
 
             {authReady && isFirebaseConfigured && !user && (
-              <LoginPage key="login" />
+              <motion.div
+                key="login"
+                initial={{ opacity: 0, y: 24, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -16, scale: 0.98 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className="w-full h-full flex"
+              >
+                <LoginPage />
+              </motion.div>
             )}
 
             {authReady && isFirebaseConfigured && user && (
-              <WalletPage key="wallet" user={user} activeTab={activeTab} onNavigateTab={(k) => setActiveTab(k)} />
+              <motion.div
+                key="wallet"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 16 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="w-full h-full flex"
+              >
+                <WalletPage user={user} activeTab={activeTab} />
+              </motion.div>
             )}
           </AnimatePresence>
         </main>
 
-        <AppFooter />
+  {user && <AppFooter />}
         
         {/* El Toaster de shadcn/ui para las notificaciones */}
         <Toaster />

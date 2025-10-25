@@ -68,9 +68,14 @@
   * {
     @apply border-border;
   }
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: 'Montserrat', sans-serif;
     font-size: 18px;
+    overflow-x: hidden; /* Previene scroll horizontal accidental en móviles */
   }
 }
