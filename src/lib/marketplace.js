@@ -5,7 +5,6 @@ import {
   doc,
   onSnapshot,
   query,
-  where,
   orderBy,
   serverTimestamp,
   runTransaction,

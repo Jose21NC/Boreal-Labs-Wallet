@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion as m } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { FileTextIcon, DownloadIcon } from 'lucide-react';
 
@@ -13,7 +13,7 @@ const CertificateCard = ({ cert }) => {
         month: 'long',
         day: 'numeric',
       });
-    } catch (e) {
+    } catch {
       return 'Fecha inválida';
     }
   };
@@ -41,7 +41,7 @@ const CertificateCard = ({ cert }) => {
   };
 
   return (
-    <motion.div
+    <m.div
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -83,7 +83,7 @@ const CertificateCard = ({ cert }) => {
           Descargar PDF
         </Button>
       </div>
-    </motion.div>
+  </m.div>
   );
 };
 

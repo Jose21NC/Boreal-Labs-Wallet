@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore, setLogLevel } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 
 // Importa las variables de entorno de Vite
 const firebaseConfig = {
@@ -40,7 +40,9 @@ try {
     try {
       // Sugerencias de UX: forzar selección de cuenta
       googleProvider.setCustomParameters({ prompt: "select_account" });
-    } catch {}
+    } catch (err) {
+      console.debug('No se pudieron establecer parámetros de GoogleAuthProvider:', err?.message || err);
+    }
     // setLogLevel('debug'); // opcional
   } else {
     console.warn(

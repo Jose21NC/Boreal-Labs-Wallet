@@ -77,5 +77,8 @@
     font-family: 'Montserrat', sans-serif;
     font-size: 18px;
     overflow-x: hidden; /* Previene scroll horizontal accidental en móviles */
+    /* Safe areas para dispositivos con notch */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion as m } from 'framer-motion';
 import logoUrl from '@/images/logo.png';
 import { Menu, X } from 'lucide-react';
 import { signOut } from 'firebase/auth';
@@ -33,7 +33,7 @@ const AppNavbar = ({ user, activeTab, onNavigate }) => {
           >
             Certificados
             {activeTab==='certs' && (
-              <motion.span
+              <m.span
                 layoutId="nav-underline"
                 className="absolute left-0 right-0 -bottom-1.5 h-[3px] rounded-full bg-gradient-to-r from-boreal-blue to-boreal-purple"
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
@@ -46,7 +46,7 @@ const AppNavbar = ({ user, activeTab, onNavigate }) => {
           >
             Mis puntos
             {activeTab==='points' && (
-              <motion.span
+              <m.span
                 layoutId="nav-underline"
                 className="absolute left-0 right-0 -bottom-1.5 h-[3px] rounded-full bg-gradient-to-r from-boreal-blue to-boreal-purple"
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
@@ -59,7 +59,7 @@ const AppNavbar = ({ user, activeTab, onNavigate }) => {
           >
             Marketplace
             {activeTab==='market' && (
-              <motion.span
+              <m.span
                 layoutId="nav-underline"
                 className="absolute left-0 right-0 -bottom-1.5 h-[3px] rounded-full bg-gradient-to-r from-boreal-blue to-boreal-purple"
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
@@ -97,7 +97,7 @@ const AppNavbar = ({ user, activeTab, onNavigate }) => {
       {/* Mobile dropdown */}
       <AnimatePresence initial={false}>
         {open && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -126,13 +126,13 @@ const AppNavbar = ({ user, activeTab, onNavigate }) => {
                 </button>
               )}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
       {/* Confirmación de cierre de sesión */}
       <AnimatePresence>
         {confirmOpen && (
-          <motion.div
+          <m.div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 min-h-dvh pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -142,7 +142,7 @@ const AppNavbar = ({ user, activeTab, onNavigate }) => {
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
               onClick={() => setConfirmOpen(false)}
             />
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -165,8 +165,8 @@ const AppNavbar = ({ user, activeTab, onNavigate }) => {
                   Confirmar
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </header>

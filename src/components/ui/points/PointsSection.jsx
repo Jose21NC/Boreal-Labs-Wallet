@@ -86,22 +86,9 @@ const PointsSection = ({ user }) => {
     const all = [...plus, ...adminPlus, ...minus];
     all.sort((a, b) => (b.at?.getTime?.() || 0) - (a.at?.getTime?.() || 0));
     return all;
-  }, [redemptions, purchases]);
+  }, [redemptions, purchases, grants]);
 
-  const handleRedeem = async (codeValue) => {
-    const value = (codeValue ?? code).trim();
-    if (!value) return;
-    setLoading(true);
-    try {
-      const res = await redeemCodeTransaction(uid, value, user?.email || null);
-      toast({ title: 'Canje exitoso', description: `Se añadieron ${res.amount} puntos a tu saldo.` });
-      setCode('');
-    } catch (err) {
-      toast({ title: 'No se pudo canjear', description: err?.message || 'Error desconocido', variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // El canje se realiza desde el modal de previsualización; se eliminó handleRedeem no utilizado
 
   const handlePreview = async (codeValue) => {
     const value = (codeValue ?? code).trim();

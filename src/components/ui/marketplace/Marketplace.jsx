@@ -8,14 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ProductCard from './ProductCard';
 import { CheckCircle2, AlertTriangle, Minus, Plus } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as m, AnimatePresence } from 'framer-motion';
 
 const Marketplace = ({ user, onViewMovements }) => {
   const uid = user?.uid;
   const { toast } = useToast();
   const [products, setProducts] = useState([]);
   const [balance, setBalance] = useState(0);
-  const [loadingBuyId, setLoadingBuyId] = useState(null);
+  const [loadingBuyId] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const [adminTab, setAdminTab] = useState('products'); // 'products' | 'points'
@@ -229,7 +229,7 @@ const Marketplace = ({ user, onViewMovements }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <AnimatePresence initial={false}>
               {filtered.map((p) => (
-                <motion.div
+                <m.div
                   key={p.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -266,7 +266,7 @@ const Marketplace = ({ user, onViewMovements }) => {
                       }
                     }}
                   />
-                </motion.div>
+                </m.div>
               ))}
             </AnimatePresence>
           </div>

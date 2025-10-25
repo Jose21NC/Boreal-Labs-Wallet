@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
+import { motion as m } from 'framer-motion';
 import { signInWithPopup, signInWithRedirect } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 
@@ -74,7 +74,7 @@ return (
       />
     </div>
     <div className="relative z-10 min-h-screen min-h-dvh w-full flex items-center justify-center px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-      <motion.div
+      <m.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
@@ -111,7 +111,7 @@ return (
         )}
         Ingresar con Google
       </Button>
-      </motion.div>
+  </m.div>
     </div>
   </div>
 );

@@ -15,14 +15,18 @@ function getAudioContext() {
   }
   // On iOS, resume on user interaction
   if (audioCtx && audioCtx.state === 'suspended') {
-    audioCtx.resume().catch(() => {});
+    audioCtx.resume().catch((err) => {
+      console.debug('No se pudo reanudar AudioContext (iOS/auto):', err?.message || err);
+    });
   }
   return audioCtx;
 }
 
 export function setEnabled(v) {
   enabled = !!v;
-  try { localStorage.setItem(LS_KEY, enabled ? '1' : '0'); } catch {}
+  try { localStorage.setItem(LS_KEY, enabled ? '1' : '0'); } catch (err) {
+    console.debug('No se pudo persistir preferencia de sonido:', err?.message || err);
+  }
 }
 
 export function isEnabled() {
@@ -30,7 +34,9 @@ export function isEnabled() {
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (raw === '0') enabled = false;
-  } catch {}
+  } catch (err) {
+    console.debug('No se pudo leer preferencia de sonido:', err?.message || err);
+  }
   return enabled;
 }
 

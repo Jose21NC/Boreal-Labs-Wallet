@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { SplashScreen } from '@capacitor/splash-screen';
+import { StatusBar, Style } from '@capacitor/status-bar';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion as m } from 'framer-motion';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from './lib/firebase'; // Importa desde tu archivo de config
 
@@ -21,6 +23,26 @@ function App() {
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [activeTab, setActiveTab] = useState('certs'); // 'certs' | 'points' | 'market'
+
+  // Configuración básica para apps móviles (ignorada en web)
+  useEffect(() => {
+    const initMobile = async () => {
+      try {
+        await StatusBar.setStyle({ style: Style.Dark });
+        // Opcional: en Android puedes fijar color de fondo de la status bar
+        // await StatusBar.setBackgroundColor({ color: '#010b1d' });
+      } catch (err) {
+        console.debug('StatusBar plugin no disponible (web):', err?.message || err);
+      }
+      try {
+        // Oculta el splash cuando la UI esté lista
+        await SplashScreen.hide();
+      } catch (err) {
+        console.debug('SplashScreen plugin no disponible (web):', err?.message || err);
+      }
+    };
+    initMobile();
+  }, []);
 
   useEffect(() => {
     if (!isFirebaseConfigured || !auth) {
@@ -73,7 +95,7 @@ function App() {
         <main className="flex-grow flex flex-col items-center w-full">
           <AnimatePresence mode="wait">
             {!isFirebaseConfigured && (
-              <motion.div
+              <m.div
                 key="config-warning"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -90,10 +112,10 @@ function App() {
                     Tras guardarlo, reinicia el servidor de desarrollo.
                   </p>
                 </div>
-              </motion.div>
+              </m.div>
             )}
             {!authReady && (
-              <motion.div
+              <m.div
                 key="loader"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -101,11 +123,11 @@ function App() {
                 className="flex-grow flex items-center justify-center"
               >
                 <Loader2 className="w-12 h-12 text-boreal-aqua animate-spin" />
-              </motion.div>
+              </m.div>
             )}
 
             {authReady && isFirebaseConfigured && !user && (
-              <motion.div
+              <m.div
                 key="login"
                 initial={{ opacity: 0, y: 24, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -114,11 +136,11 @@ function App() {
                 className="w-full h-full flex"
               >
                 <LoginPage />
-              </motion.div>
+              </m.div>
             )}
 
             {authReady && isFirebaseConfigured && user && (
-              <motion.div
+              <m.div
                 key="wallet"
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -127,7 +149,7 @@ function App() {
                 className="w-full h-full flex"
               >
                 <WalletPage user={user} activeTab={activeTab} />
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
         </main>

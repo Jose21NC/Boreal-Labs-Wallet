@@ -1,4 +1,4 @@
-import { doc, getDoc, getDocs, setDoc, updateDoc, increment, serverTimestamp, onSnapshot, runTransaction, collection, query, orderBy, limit, where } from 'firebase/firestore';
+import { doc, getDoc, getDocs, increment, serverTimestamp, onSnapshot, runTransaction, collection, query, orderBy, limit, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 // Escuchar el saldo de puntos del usuario en tiempo real (doc: userPoints/{uid})
@@ -117,7 +117,9 @@ export async function fetchCodeInfo(code) {
   let expiresAt = null;
   try {
     if (data.expiresAt?.toDate) expiresAt = data.expiresAt.toDate();
-  } catch {}
+  } catch (err) {
+    console.debug('No se pudo convertir expiresAt a Date:', err?.message || err);
+  }
   // Retornamos id = el código ingresado (no el docId aleatorio) para mantener UX
   return { id: String(code).trim(), ...data, expiresAt };
 }

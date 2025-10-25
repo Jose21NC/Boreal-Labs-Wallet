@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as m, AnimatePresence } from 'framer-motion';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import PointsSection from '@/components/ui/points/PointsSection';
@@ -43,12 +43,12 @@ const WalletPage = ({ user, activeTab = 'certs', onNavigateTab }) => {
     }));
 
     return () => unsubs.forEach((u) => u && u());
-  }, [user, db]);
+  }, [user]);
 
   const userName = user.displayName || user.email.split('@')[0];
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -92,7 +92,7 @@ const WalletPage = ({ user, activeTab = 'certs', onNavigateTab }) => {
       )}
 
       {activeTab==='certs' && !loading && certificates.length > 0 && (
-        <motion.div
+        <m.div
           key="certs"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -103,23 +103,23 @@ const WalletPage = ({ user, activeTab = 'certs', onNavigateTab }) => {
           {certificates.map((cert) => (
             <CertificateCard key={cert.id} cert={cert} />
           ))}
-        </motion.div>
+        </m.div>
       )}
 
       {activeTab==='points' && (
-        <motion.div key="points" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="mt-4">
+        <m.div key="points" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="mt-4">
           <PointsSection user={user} />
-        </motion.div>
+        </m.div>
       )}
 
       {activeTab==='market' && (
-        <motion.div key="market" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="mt-4">
+        <m.div key="market" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="mt-4">
           <Marketplace user={user} onViewMovements={() => onNavigateTab && onNavigateTab('points')} />
-        </motion.div>
+        </m.div>
       )}
       </AnimatePresence>
 
-    </motion.div>
+    </m.div>
   );
 };
 
