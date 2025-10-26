@@ -82,8 +82,23 @@ const LoginPage = () => {
           await signInWithCredential(auth, firebaseCred);
         } catch (nativeErr) {
           console.error('Login nativo con Google falló:', nativeErr);
-          // No hacer fallback a navegador para evitar abrirlo fuera de la app
-          throw nativeErr;
+          const msg = String(nativeErr?.message || nativeErr?.code || '');
+          // Manejo específico para "no credentials available" en móvil
+          if (msg.toLowerCase().includes('no credentials available')) {
+            toast({
+              title: 'No hay credenciales de Google en el dispositivo',
+              description: 'Asegúrate de tener una cuenta de Google añadida en el dispositivo y que Google Play Services esté actualizado. También verifica la configuración de OAuth/cliente web en Firebase. Puedes ingresar con correo y contraseña como alternativa.',
+              variant: 'destructive'
+            });
+            return; // Evita lanzar la excepción para no romper la UX
+          }
+          // Otros errores
+          toast({
+            title: 'Error con Google (nativo)',
+            description: msg || 'No se pudo iniciar sesión con Google en el dispositivo.',
+            variant: 'destructive'
+          });
+          return;
         }
       } else {
         // Web: intentar popup y si falla, redirect
@@ -217,23 +232,7 @@ return (
           </Button>
         </div>
         {/* Botón para descargar la app Android solo en web */}
-        {isWeb && (
-          <a
-            href="https://github.com/Jose21NC/Boreal-Labs-Wallet/releases/download/Android/app-release.apk"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 w-full block"
-          >
-            <Button
-              variant="default"
-              className="w-full bg-boreal-aqua/80 hover:bg-boreal-aqua text-boreal-dark font-semibold flex items-center justify-center gap-2 py-2 text-lg shadow-lg"
-            >
-              {/* Icono Android SVG */}
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" className="mr-2"><path d="M17.94 7.34l1.43-2.49a.5.5 0 0 0-.18-.68.5.5 0 0 0-.68.18l-1.46 2.54A7.07 7.07 0 0 0 12 6c-1.53 0-2.96.48-4.05 1.29L6.49 4.75a.5.5 0 0 0-.68-.18.5.5 0 0 0-.18.68l1.43 2.49C4.13 9.01 2.5 11.36 2.5 14.06V17c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2v-2.94c0-2.7-1.63-5.05-3.56-6.72zM7.5 19c-.83 0-1.5-.67-1.5-1.5S6.67 16 7.5 16s1.5.67 1.5 1.5S8.33 19 7.5 19zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S17.33 19 16.5 19z"/></svg>
-              Descargar app Android
-            </Button>
-          </a>
-        )}
+        {/* Botón de descarga de app Android eliminado a solicitud */}
       </m.div>
     </div>
   </div>
