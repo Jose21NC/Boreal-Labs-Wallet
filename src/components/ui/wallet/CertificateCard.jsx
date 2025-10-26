@@ -37,12 +37,65 @@ const CertificateCard = ({ cert }) => {
     return null;
   };
 
+  const isMobileBrowser = () => {
+    if (Capacitor?.getPlatform && Capacitor.getPlatform() !== 'web') return false; // app nativa no es navegador
+    if (typeof navigator === 'undefined') return false;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
+  const sanitizeFileName = (name) => {
+    return (name || 'certificado').toString().replace(/[^a-zA-Z0-9-_\.]+/g, '_') + '.pdf';
+  };
+
+  const ensureDownloadUrl = (url, filename) => {
+    try {
+      const u = new URL(url);
+      // Forzar descarga en Firebase Storage (GCS) añadiendo content-disposition como adjunto
+      if (u.hostname.includes('firebasestorage.googleapis.com')) {
+        u.searchParams.set('alt', 'media');
+        u.searchParams.set('response-content-type', 'application/pdf');
+        const disp = `attachment; filename="${filename}"`;
+        u.searchParams.set('response-content-disposition', disp);
+      }
+      return u.toString();
+    } catch {
+      return url;
+    }
+  };
+
+  const downloadViaFetch = async (url, filename) => {
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+      return true;
+    } catch (e) {
+      console.warn('Fallo descarga via fetch, se usará window.open:', e);
+      return false;
+    }
+  };
+
   const handleDownload = async () => {
-    const pdfUrl = getPdfUrl();
+    const baseUrl = getPdfUrl();
+    const filename = sanitizeFileName(cert?.nombreEvento || 'certificado');
+    const pdfUrl = ensureDownloadUrl(baseUrl, filename);
     if (!pdfUrl) return;
 
     try {
-      // En web o nativo, intentar abrir en nueva pestaña/visor
+      if (isMobileBrowser()) {
+        // En navegadores móviles, intentamos forzar descarga directa
+        const ok = await downloadViaFetch(pdfUrl, filename);
+        if (ok) return;
+      }
+      // En otros casos, abrir en una nueva pestaña/visor
       window.open(pdfUrl, '_blank', 'noopener');
     } catch (e) {
       // Fallback seguro si falla el plugin o está ausente
@@ -54,6 +107,7 @@ const CertificateCard = ({ cert }) => {
         a.href = pdfUrl;
         a.target = '_blank';
         a.rel = 'noopener';
+        a.download = filename;
         // Nota: el atributo download no funciona en cross-origin en la mayoría de navegadores
         document.body.appendChild(a);
         a.click();
