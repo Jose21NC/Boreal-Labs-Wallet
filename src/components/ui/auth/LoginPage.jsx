@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion as m } from 'framer-motion';
-import { signInWithPopup, signInWithRedirect, signInWithCredential, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, signInWithCredential, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider, isFirebaseConfigured } from '@/lib/firebase';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
@@ -9,7 +9,7 @@ import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 // UI (shadcn y lucide)
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast'; // Hook para notificaciones
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mail } from 'lucide-react';
 import logoBoreal from '@/images/logo.png';
 
 // Icono de Google (inline SVG ya que no está en lucide)
@@ -20,10 +20,9 @@ const IconGoogle = (props) => (
 );
 
 const LoginPage = () => {
-  const [loading, setLoading] = useState(null); // 'google' | 'email' | 'register' | 'reset' | null
+  const [loading, setLoading] = useState(null); // 'google' | 'email' | null
   const { toast } = useToast(); // Hook de shadcn
   const [isWeb, setIsWeb] = useState(true);
-  const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -62,48 +61,7 @@ const LoginPage = () => {
     }
   };
 
-  const handleEmailRegister = async () => {
-    setLoading('register');
-    try {
-      ensureFirebase();
-      if (!email || !password) throw new Error('Ingresa correo y una contraseña.');
-      if (password.length < 6) throw new Error('La contraseña debe tener al menos 6 caracteres.');
-      await createUserWithEmailAndPassword(auth, email.trim(), password);
-      toast({ title: 'Cuenta creada', description: 'Sesión iniciada correctamente.' });
-    } catch (err) {
-      console.error(err);
-      let description = String(err?.message || err?.code || 'No se pudo crear la cuenta.');
-      if (String(err?.code).includes('auth/email-already-in-use')) {
-        description = 'Este correo ya está registrado. Prueba iniciar sesión.';
-      } else if (String(err?.code).includes('auth/invalid-email')) {
-        description = 'Correo inválido.';
-      } else if (String(err?.code).includes('auth/weak-password')) {
-        description = 'La contraseña es demasiado débil.';
-      }
-      toast({ title: 'Error al registrar', description, variant: 'destructive' });
-    } finally {
-      setLoading(null);
-    }
-  };
-
-  const handleResetPassword = async () => {
-    setLoading('reset');
-    try {
-      ensureFirebase();
-      if (!email) throw new Error('Ingresa tu correo para enviar el enlace.');
-      await sendPasswordResetEmail(auth, email.trim());
-      toast({ title: 'Enlace enviado', description: 'Revisa tu correo para restablecer tu contraseña.' });
-    } catch (err) {
-      console.error(err);
-      let description = String(err?.message || err?.code || 'No se pudo enviar el enlace.');
-      if (String(err?.code).includes('auth/user-not-found')) {
-        description = 'No existe una cuenta con ese correo.';
-      }
-      toast({ title: 'Error al restablecer', description, variant: 'destructive' });
-    } finally {
-      setLoading(null);
-    }
-  };
+  // Registro y recuperación eliminados a pedido: solo inicio con correo/contraseña.
 
   const handleGoogleLogin = async () => {
     setLoading('google');
@@ -197,7 +155,7 @@ return (
           </h2>
         </div>
         <p className="text-center text-gray-200 mb-8 text-base font-medium">
-          Inicia sesión con Google o con tu correo y contraseña para ver tus certificados, puntos y recompensas.
+          Inicia sesión para ver tus certificados, puntos y recompensas.
         </p>
         <Button
           variant="outline"
@@ -219,7 +177,7 @@ return (
           <hr className="flex-grow border-t border-gray-400 opacity-50" />
         </div>
 
-        {/* Formulario Email/Contraseña */}
+        {/* Formulario Email/Contraseña (solo login) */}
         <div className="space-y-3 mb-4">
           <div>
             <label htmlFor="email" className="block text-sm text-gray-200 mb-1">Correo</label>
@@ -238,49 +196,25 @@ return (
             <input
               id="password"
               type="password"
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              autoComplete='current-password'
               className="w-full rounded-lg bg-white/10 border border-white/20 px-3 py-2 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-boreal-aqua/60"
-              placeholder={mode === 'login' ? 'Tu contraseña' : 'Mínimo 6 caracteres'}
+              placeholder='Tu contraseña'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          {mode === 'login' ? (
-            <Button
-              className="w-full bg-boreal-aqua/80 hover:bg-boreal-aqua text-boreal-dark font-semibold py-2"
-              onClick={handleEmailLogin}
-              disabled={loading === 'email'}
-            >
-              {loading === 'email' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Ingresar con correo
-            </Button>
-          ) : (
-            <Button
-              className="w-full bg-boreal-aqua/80 hover:bg-boreal-aqua text-boreal-dark font-semibold py-2"
-              onClick={handleEmailRegister}
-              disabled={loading === 'register'}
-            >
-              {loading === 'register' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Crear cuenta
-            </Button>
-          )}
-          <div className="flex items-center justify-between text-sm">
-            <button
-              type="button"
-              onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              className="text-boreal-aqua hover:underline"
-            >
-              {mode === 'login' ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
-            </button>
-            <button
-              type="button"
-              onClick={handleResetPassword}
-              className="text-boreal-blue hover:underline"
-              disabled={loading === 'reset'}
-            >
-              ¿Olvidaste tu contraseña?
-            </button>
-          </div>
+          <Button
+            className="w-full bg-gradient-to-r from-boreal-aqua to-boreal-blue text-boreal-dark font-bold py-2 hover:opacity-90 shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+            onClick={handleEmailLogin}
+            disabled={loading === 'email'}
+          >
+            {loading === 'email' ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Mail className="w-4 h-4" />
+            )}
+            Ingresar con correo
+          </Button>
         </div>
         {/* Botón para descargar la app Android solo en web */}
         {isWeb && (
