@@ -1,6 +1,6 @@
 # Boreal Labs Wallet
 
-Aplicación de billetera digital con marketplace y sistema de puntos, construída con React, Vite, Tailwind y Capacitor para ejecutarse como app web y móvil (Android/iOS).
+Aplicación de billetera digital de certificados de Boreal Labs, con marketplace y sistema de puntos integrado, construída con React, Vite, Tailwind y Capacitor para ejecutarse como app web y móvil (Android/iOS).
 
 > Estado: v1.0.0 (Primera versión estable)
 

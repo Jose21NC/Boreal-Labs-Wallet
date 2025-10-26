@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion as m } from 'framer-motion';
-import { signInWithPopup, signInWithRedirect, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { signInWithPopup, signInWithRedirect, signInWithCredential, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { auth, googleProvider, isFirebaseConfigured } from '@/lib/firebase';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 
@@ -20,15 +20,90 @@ const IconGoogle = (props) => (
 );
 
 const LoginPage = () => {
-  const [loading, setLoading] = useState(null); // 'google' | null
+  const [loading, setLoading] = useState(null); // 'google' | 'email' | 'register' | 'reset' | null
   const { toast } = useToast(); // Hook de shadcn
   const [isWeb, setIsWeb] = useState(true);
+  const [mode, setMode] = useState('login'); // 'login' | 'register'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   React.useEffect(() => {
     setIsWeb(Capacitor.getPlatform() === 'web');
   }, []);
 
-  // Eliminado soporte de email/contraseña. Solo Google.
+  const ensureFirebase = () => {
+    if (!auth || !isFirebaseConfigured) {
+      throw new Error('Firebase no está configurado. Completa el archivo .env con VITE_FIREBASE_* y reinicia.');
+    }
+  }
+
+  // Email/Contraseña
+  const handleEmailLogin = async () => {
+    setLoading('email');
+    try {
+      ensureFirebase();
+      if (!email || !password) throw new Error('Ingresa correo y contraseña.');
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      toast({ title: '¡Bienvenido!', description: 'Inicio de sesión exitoso.' });
+      // La app puede redirigir via onAuthStateChanged en App.jsx
+    } catch (err) {
+      console.error(err);
+      let description = String(err?.message || err?.code || 'No se pudo iniciar sesión.');
+      if (String(err?.code).includes('auth/invalid-credential') || String(err?.code).includes('auth/invalid-login-credentials')) {
+        description = 'Credenciales inválidas. Verifica tu correo y contraseña.';
+      } else if (String(err?.code).includes('auth/user-not-found')) {
+        description = 'No existe una cuenta con ese correo.';
+      } else if (String(err?.code).includes('auth/too-many-requests')) {
+        description = 'Demasiados intentos. Inténtalo más tarde.';
+      }
+      toast({ title: 'Error al iniciar sesión', description, variant: 'destructive' });
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleEmailRegister = async () => {
+    setLoading('register');
+    try {
+      ensureFirebase();
+      if (!email || !password) throw new Error('Ingresa correo y una contraseña.');
+      if (password.length < 6) throw new Error('La contraseña debe tener al menos 6 caracteres.');
+      await createUserWithEmailAndPassword(auth, email.trim(), password);
+      toast({ title: 'Cuenta creada', description: 'Sesión iniciada correctamente.' });
+    } catch (err) {
+      console.error(err);
+      let description = String(err?.message || err?.code || 'No se pudo crear la cuenta.');
+      if (String(err?.code).includes('auth/email-already-in-use')) {
+        description = 'Este correo ya está registrado. Prueba iniciar sesión.';
+      } else if (String(err?.code).includes('auth/invalid-email')) {
+        description = 'Correo inválido.';
+      } else if (String(err?.code).includes('auth/weak-password')) {
+        description = 'La contraseña es demasiado débil.';
+      }
+      toast({ title: 'Error al registrar', description, variant: 'destructive' });
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    setLoading('reset');
+    try {
+      ensureFirebase();
+      if (!email) throw new Error('Ingresa tu correo para enviar el enlace.');
+      await sendPasswordResetEmail(auth, email.trim());
+      toast({ title: 'Enlace enviado', description: 'Revisa tu correo para restablecer tu contraseña.' });
+    } catch (err) {
+      console.error(err);
+      let description = String(err?.message || err?.code || 'No se pudo enviar el enlace.');
+      if (String(err?.code).includes('auth/user-not-found')) {
+        description = 'No existe una cuenta con ese correo.';
+      }
+      toast({ title: 'Error al restablecer', description, variant: 'destructive' });
+    } finally {
+      setLoading(null);
+    }
+  };
 
   const handleGoogleLogin = async () => {
     setLoading('google');
@@ -122,7 +197,7 @@ return (
           </h2>
         </div>
         <p className="text-center text-gray-200 mb-8 text-base font-medium">
-          Inicia sesión con tu cuenta de Google para ver tus certificados, puntos, y recompensas.
+          Inicia sesión con Google o con tu correo y contraseña para ver tus certificados, puntos y recompensas.
         </p>
         <Button
           variant="outline"
@@ -138,13 +213,75 @@ return (
           Ingresar con Google
         </Button>
         {/* Espaciador visual */}
-        {isWeb && (
-          <div className="w-full flex items-center my-5">
-            <hr className="flex-grow border-t border-gray-400 opacity-50" />
-            <span className="mx-4 text-gray-400 font-semibold select-none">O</span>
-            <hr className="flex-grow border-t border-gray-400 opacity-50" />
+        <div className="w-full flex items-center my-5">
+          <hr className="flex-grow border-t border-gray-400 opacity-50" />
+          <span className="mx-4 text-gray-400 font-semibold select-none">O</span>
+          <hr className="flex-grow border-t border-gray-400 opacity-50" />
+        </div>
+
+        {/* Formulario Email/Contraseña */}
+        <div className="space-y-3 mb-4">
+          <div>
+            <label htmlFor="email" className="block text-sm text-gray-200 mb-1">Correo</label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              className="w-full rounded-lg bg-white/10 border border-white/20 px-3 py-2 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-boreal-aqua/60"
+              placeholder="tucorreo@ejemplo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
-        )}
+          <div>
+            <label htmlFor="password" className="block text-sm text-gray-200 mb-1">Contraseña</label>
+            <input
+              id="password"
+              type="password"
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              className="w-full rounded-lg bg-white/10 border border-white/20 px-3 py-2 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-boreal-aqua/60"
+              placeholder={mode === 'login' ? 'Tu contraseña' : 'Mínimo 6 caracteres'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          {mode === 'login' ? (
+            <Button
+              className="w-full bg-boreal-aqua/80 hover:bg-boreal-aqua text-boreal-dark font-semibold py-2"
+              onClick={handleEmailLogin}
+              disabled={loading === 'email'}
+            >
+              {loading === 'email' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Ingresar con correo
+            </Button>
+          ) : (
+            <Button
+              className="w-full bg-boreal-aqua/80 hover:bg-boreal-aqua text-boreal-dark font-semibold py-2"
+              onClick={handleEmailRegister}
+              disabled={loading === 'register'}
+            >
+              {loading === 'register' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Crear cuenta
+            </Button>
+          )}
+          <div className="flex items-center justify-between text-sm">
+            <button
+              type="button"
+              onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+              className="text-boreal-aqua hover:underline"
+            >
+              {mode === 'login' ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
+            </button>
+            <button
+              type="button"
+              onClick={handleResetPassword}
+              className="text-boreal-blue hover:underline"
+              disabled={loading === 'reset'}
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
+        </div>
         {/* Botón para descargar la app Android solo en web */}
         {isWeb && (
           <a
