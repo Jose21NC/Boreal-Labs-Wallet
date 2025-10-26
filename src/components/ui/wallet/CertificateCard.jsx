@@ -2,6 +2,7 @@ import React from 'react';
 import { motion as m } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { FileTextIcon, DownloadIcon } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 
 const CertificateCard = ({ cert }) => {
   const formatDate = (date) => {
@@ -30,14 +31,35 @@ const CertificateCard = ({ cert }) => {
     if (Array.isArray(cert?.urlPdf) && cert.urlPdf.length > 0) {
       return cert.urlPdf[0]?.downloadURL || cert.urlPdf[0]?.url || null;
     }
+    if (typeof cert?.urlPdf === 'string') return cert.urlPdf;
     if (cert?.urlPdf?.downloadURL) return cert.urlPdf.downloadURL;
     if (cert?.downloadURL) return cert.downloadURL;
     return null;
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const pdfUrl = getPdfUrl();
-    if (pdfUrl) window.open(pdfUrl, '_blank');
+    if (!pdfUrl) return;
+
+    try {
+      // En web o nativo, intentar abrir en nueva pestaña/visor
+      window.open(pdfUrl, '_blank', 'noopener');
+    } catch (e) {
+      // Fallback seguro si falla el plugin o está ausente
+      try {
+        window.open(pdfUrl, '_blank', 'noopener');
+      } catch {
+        // último recurso: crear un enlace temporal
+        const a = document.createElement('a');
+        a.href = pdfUrl;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        // Nota: el atributo download no funciona en cross-origin en la mayoría de navegadores
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    }
   };
 
   return (
