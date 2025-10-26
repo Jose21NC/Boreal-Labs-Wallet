@@ -4,4 +4,6 @@
     <string name="title_activity_main">Boreal Wallet</string>
     <string name="package_name">com.boreal.wallet</string>
     <string name="custom_url_scheme">com.boreal.wallet</string>
+    <!-- ID de cliente web de OAuth 2.0 para Google Sign-In -->
+    <string name="default_web_client_id">338356857449-8n5nkpnkhvmfmld6gsehp3qk29tlemhk.apps.googleusercontent.com</string>
 </resources>

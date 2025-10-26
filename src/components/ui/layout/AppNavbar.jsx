@@ -8,6 +8,7 @@ import { auth } from '@/lib/firebase';
 const AppNavbar = ({ user, activeTab, onNavigate }) => {
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // Ajustes deshabilitados globalmente por solicitud
 
   const handleSignOut = async () => {
     try {
@@ -18,7 +19,7 @@ const AppNavbar = ({ user, activeTab, onNavigate }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full glass-effect">
+    <header className="fixed top-0 inset-x-0 z-50 w-full glass-effect">
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-4 py-4 md:py-5">
         <a href="#" className="flex items-center gap-3">
           <img src={logoUrl} alt="Boreal Labs" className="h-9 md:h-11 w-auto" />
@@ -82,9 +83,11 @@ const AppNavbar = ({ user, activeTab, onNavigate }) => {
               Cerrar sesión
             </button>
           )}
+          {/* Ajustes deshabilitados */}
         </div>
 
         {/* Mobile burger */}
+        <div className="md:hidden flex items-center gap-2">
         <button
           className={`md:hidden p-2 rounded-md hover:bg-white/10 ${confirmOpen ? 'opacity-60 pointer-events-none' : ''}`}
           aria-label="Abrir menú"
@@ -93,6 +96,8 @@ const AppNavbar = ({ user, activeTab, onNavigate }) => {
         >
           {open ? <X className="w-7 h-7 text-white" /> : <Menu className="w-7 h-7 text-white" />}
         </button>
+        {/* Ajustes deshabilitados */}
+        </div>
       </nav>
       {/* Mobile dropdown */}
       <AnimatePresence initial={false}>
@@ -169,6 +174,7 @@ const AppNavbar = ({ user, activeTab, onNavigate }) => {
           </m.div>
         )}
       </AnimatePresence>
+      {/* Ajustes deshabilitados globalmente */}
     </header>
   );
 };

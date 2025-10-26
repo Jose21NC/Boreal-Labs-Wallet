@@ -45,5 +45,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+  
+	<!-- Camera usage description for QR scanning in WKWebView (react-zxing/getUserMedia) -->
+	<key>NSCameraUsageDescription</key>
+	<string>Necesitamos acceder a tu cámara para escanear códigos QR.</string>
 </dict>
 </plist>

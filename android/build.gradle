@@ -24,6 +24,19 @@ allprojects {
     }
 }
 
+// Propagar flags de variables.gradle a todos los subproyectos (plugins de Capacitor)
+subprojects { subproj ->
+    if (rootProject.ext.has('rgcfaIncludeGoogle')) {
+        ext.rgcfaIncludeGoogle = rootProject.ext.rgcfaIncludeGoogle
+    }
+    if (rootProject.ext.has('rgcfaIncludeFacebook')) {
+        ext.rgcfaIncludeFacebook = rootProject.ext.rgcfaIncludeFacebook
+    }
+    if (rootProject.ext.has('playServicesAuthVersion')) {
+        ext.playServicesAuthVersion = rootProject.ext.playServicesAuthVersion
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

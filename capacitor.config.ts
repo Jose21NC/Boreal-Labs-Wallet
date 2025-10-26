@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Boreal Wallet',
   webDir: 'dist',
   server: {
-    androidScheme: 'https',
+    androidScheme: 'http',
   },
 };
 

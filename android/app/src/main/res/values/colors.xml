@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Azul oscuro Boreal -->
+    <color name="splashscreen_background">#0A1836</color>
+    <!-- Opcionales para temas si decides usarlos más adelante -->
+    <color name="colorPrimary">#0A1836</color>
+    <color name="colorPrimaryDark">#071128</color>
+    <color name="colorAccent">#3162ED</color>
+</resources>

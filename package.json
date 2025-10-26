@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:android": "vite --host 0.0.0.0",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -12,10 +13,16 @@
     "cap:add:android": "cap add android",
     "cap:sync": "cap sync",
     "cap:open:ios": "cap open ios",
-    "cap:open:android": "cap open android"
+    "cap:open:android": "cap open android",
+    "cap:sync:android": "cap sync android",
+    "cap:run:android:lr": "cap run android -l --external",
+    "android:install": "cd android && ./gradlew installDebug",
+    "android:assemble": "cd android && ./gradlew assembleRelease",
+    "android:bundle": "cd android && ./gradlew bundleRelease"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.4",
+    "@capacitor/google": "^6.1.1",
     "@capacitor/core": "^7.4.4",
     "@capacitor/ios": "^7.4.4",
     "@capacitor/splash-screen": "^7.0.3",
@@ -35,6 +42,8 @@
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
+    "@capacitor-firebase/authentication": "^7.3.1",
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^7.4.4",
     "@eslint/js": "^9.36.0",
     "@types/react": "^18.3.12",

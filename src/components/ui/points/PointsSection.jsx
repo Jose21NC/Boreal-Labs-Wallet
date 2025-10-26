@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, QrCode, CheckCircle2 } from 'lucide-react';
 import { useZxing } from 'react-zxing';
+import { Capacitor } from '@capacitor/core';
 
 const PointsSection = ({ user }) => {
   const uid = user?.uid;
@@ -115,12 +116,31 @@ const PointsSection = ({ user }) => {
       handlePreview(text);
     },
     paused: !scanning,
+    // Forzar cámara trasera cuando sea posible
+    constraints: { video: { facingMode: { ideal: 'environment' } } },
   });
+
+  async function ensureCameraPermission() {
+    // En web móvil/desktop el navegador maneja el prompt; en apps nativas WKWebView/WebView
+    // necesitamos tener el permiso en el manifiesto (hecho) y disparar getUserMedia para mostrar el prompt.
+    if (!('mediaDevices' in navigator) || !navigator.mediaDevices?.getUserMedia) {
+      throw new Error('Tu dispositivo o navegador no soporta acceso a la cámara.');
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+      // Liberar inmediatamente (useZxing abrirá su propio stream)
+      stream.getTracks().forEach((t) => t.stop());
+      return true;
+    } catch (err) {
+      // Errores comunes: NotAllowedError, NotFoundError
+      throw err;
+    }
+  }
 
   return (
     <div className="rounded-2xl glass-effect p-6 w-full">
       <div className="flex items-end justify-between flex-wrap gap-3">
-        <h2 className="font-black text-[60px] leading-[60px]">
+        <h2 className="font-black tracking-tight text-[40px] leading-[44px] sm:text-[60px] sm:leading-[60px]">
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-boreal-aqua to-boreal-blue">Mis puntos</span>
         </h2>
         <div className="text-6xl font-black text-boreal-aqua leading-none">{balance}</div>
@@ -156,7 +176,22 @@ const PointsSection = ({ user }) => {
               <div className="p-8 text-center text-gray-300">
                 <QrCode className="w-10 h-10 mx-auto mb-3 text-boreal-aqua" />
                 <p>Activa la cámara para escanear un código QR</p>
-                <Button variant="outline" className="mt-3 border-white/30 text-white hover:bg-white/10" onClick={() => setScanning(true)}>
+                <Button
+                  variant="outline"
+                  className="mt-3 border-white/30 text-white hover:bg-white/10"
+                  onClick={async () => {
+                    try {
+                      // En apps nativas intenta anticipar el prompt
+                      if (Capacitor.getPlatform() !== 'web') {
+                        await ensureCameraPermission();
+                      }
+                      setScanning(true);
+                    } catch (err) {
+                      const msg = err?.message || 'No se pudo acceder a la cámara.';
+                      toast({ title: 'Permiso de cámara', description: msg + ' Revisa los permisos de la app en Ajustes.', variant: 'destructive' });
+                    }
+                  }}
+                >
                   Usar cámara
                 </Button>
               </div>

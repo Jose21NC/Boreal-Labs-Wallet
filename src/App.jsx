@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -17,18 +18,27 @@ import faviconUrl from '@/images/favicon-f169e2d8.png';
 
 // UI
 import { Toaster } from "@/components/ui/toaster"; // Importa el Toaster de shadcn
+import { SettingsProvider } from '@/contexts/SettingsContext';
 import { Loader2 } from 'lucide-react';
+import PrivacyPage from '@/components/ui/layout/privacy/PrivacyPage';
 
 function App() {
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [activeTab, setActiveTab] = useState('certs'); // 'certs' | 'points' | 'market'
+  const isWeb = Capacitor.getPlatform() === 'web';
+  const path = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const isPrivacyRoute = path === '/privacy';
 
   // Configuración básica para apps móviles (ignorada en web)
   useEffect(() => {
     const initMobile = async () => {
       try {
         await StatusBar.setStyle({ style: Style.Dark });
+        // Ocultar la barra de estado en Android/iOS (se solicitó ocultarla en Android)
+        if (Capacitor.getPlatform() !== 'web') {
+          await StatusBar.hide();
+        }
         // Opcional: en Android puedes fijar color de fondo de la status bar
         // await StatusBar.setBackgroundColor({ color: '#010b1d' });
       } catch (err) {
@@ -65,6 +75,7 @@ function App() {
   }, []);
 
   return (
+    <SettingsProvider>
     <HelmetProvider>
       <div 
         className="bg-boreal-dark text-white min-h-screen w-full flex flex-col overflow-x-hidden"
@@ -84,7 +95,7 @@ function App() {
           `}</style>
         </Helmet>
         
-        {user && (
+        {!isPrivacyRoute && user && (
           <AppNavbar
             user={user}
             activeTab={activeTab}
@@ -92,7 +103,13 @@ function App() {
           />
         )}
 
+        {/* Spacer para compensar navbar fija */}
+        {!isPrivacyRoute && user && <div className="h-16 md:h-20" />}
+
         <main className="flex-grow flex flex-col items-center w-full">
+          {isPrivacyRoute ? (
+            <PrivacyPage />
+          ) : (
           <AnimatePresence mode="wait">
             {!isFirebaseConfigured && (
               <m.div
@@ -152,14 +169,16 @@ function App() {
               </m.div>
             )}
           </AnimatePresence>
+          )}
         </main>
 
-  {user && <AppFooter />}
+  {!isPrivacyRoute && user && isWeb && <AppFooter />}
         
         {/* El Toaster de shadcn/ui para las notificaciones */}
         <Toaster />
       </div>
     </HelmetProvider>
+    </SettingsProvider>
   );
 }
 

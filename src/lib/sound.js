@@ -2,7 +2,7 @@
 // Discrete UI sounds with tiny envelopes. Persist enabled flag in localStorage.
 
 let audioCtx = null;
-let enabled = true;
+let enabled = false; // Desactivado por defecto
 
 const LS_KEY = 'blw_sound_enabled';
 
@@ -33,7 +33,8 @@ export function isEnabled() {
   // Lazy load from LS on first call
   try {
     const raw = localStorage.getItem(LS_KEY);
-    if (raw === '0') enabled = false;
+    if (raw === '1') enabled = true;
+    else if (raw === '0') enabled = false;
   } catch (err) {
     console.debug('No se pudo leer preferencia de sonido:', err?.message || err);
   }

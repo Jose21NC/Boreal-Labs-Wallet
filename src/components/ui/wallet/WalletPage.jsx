@@ -59,7 +59,7 @@ const WalletPage = ({ user, activeTab = 'certs', onNavigateTab }) => {
       </Helmet>
       {activeTab === 'certs' && (
         <>
-          <h1 className="font-black mb-2 text-[60px] leading-[60px]">
+          <h1 className="font-black tracking-tight mb-2 text-[40px] leading-[44px] sm:text-[60px] sm:leading-[60px]">
             <span className="text-white">Hola, </span>
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-boreal-aqua to-boreal-blue">
               {userName}

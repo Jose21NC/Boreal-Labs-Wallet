@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "338356857449",
+    "project_id": "borealabsweb",
+    "storage_bucket": "borealabsweb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:338356857449:android:01f1549b1691e4541390f8",
+        "android_client_info": {
+          "package_name": "com.boreal.wallet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "338356857449-vfh5fvo8gebik35bq4erlstfbs4u6nvd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.boreal.wallet",
+            "certificate_hash": "4abcb11233e6c3ca34e6f850e2d3c2fd570538db"
+          }
+        },
+        {
+          "client_id": "338356857449-8n5nkpnkhvmfmld6gsehp3qk29tlemhk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFjiGScTbahjmxV-Ni-NtKOPEEP6i1_qI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "338356857449-8n5nkpnkhvmfmld6gsehp3qk29tlemhk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
