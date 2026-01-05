@@ -86,6 +86,53 @@ export async function awardPointsByEmail(targetEmail, amount, adminEmail, note =
   return { email, amount: pts, uid };
 }
 
+// Ajustar puntos (suma o resta) asegurando que el saldo no quede negativo.
+// Útil para correcciones manuales desde el panel admin oculto.
+export async function adjustPointsByEmail(targetEmail, delta, adminEmail, note = '') {
+  const email = String(targetEmail || '').trim().toLowerCase();
+  const change = Number(delta);
+  if (!email) throw new Error('Correo requerido');
+  if (!Number.isFinite(change) || change === 0) throw new Error('Monto de ajuste inválido');
+
+  const upCol = collection(db, 'userPoints');
+  const q = query(upCol, where('email', '==', email), limit(1));
+  const qs = await getDocs(q);
+  if (qs.empty) {
+    throw new Error('No se encontró un usuario con ese correo. Pídele que inicie sesión primero.');
+  }
+
+  const userDoc = qs.docs[0];
+  const uid = userDoc.id;
+  const userPointsRef = doc(db, 'userPoints', uid);
+  const grantsCol = collection(db, 'userPoints', uid, 'adminGrants');
+
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(userPointsRef);
+    const currentBalance = Number((snap.exists() ? snap.data().balance : 0) || 0);
+    const nextBalance = currentBalance + change;
+    if (nextBalance < 0) throw new Error('El ajuste dejaría el saldo en negativo');
+
+    if (!snap.exists()) {
+      tx.set(userPointsRef, { balance: nextBalance, updatedAt: serverTimestamp(), email });
+    } else {
+      tx.update(userPointsRef, { balance: nextBalance, updatedAt: serverTimestamp(), email });
+    }
+
+    const grantRef = doc(grantsCol);
+    tx.set(grantRef, {
+      amount: change,
+      balanceAfter: nextBalance,
+      email,
+      note: note || '',
+      grantedAt: serverTimestamp(),
+      grantedBy: adminEmail || null,
+      type: 'manual-adjust',
+    });
+  });
+
+  return { email, delta: change, uid };
+}
+
 // Traer info de un código antes de canjear (para previsualizar)
 async function resolvePointCodeDoc(codeId) {
   const id = String(codeId).trim();

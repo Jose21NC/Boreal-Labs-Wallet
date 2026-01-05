@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@capacitor/android": "^7.4.4",
-    "@capacitor/google": "^6.1.1",
     "@capacitor/core": "^7.4.4",
     "@capacitor/ios": "^7.4.4",
     "@capacitor/splash-screen": "^7.0.3",

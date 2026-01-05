@@ -15,6 +15,7 @@ import AppFooter from '@/components/ui/layout/AppFooter';
 import LoginPage from '@/components/ui/auth/LoginPage';
 import WalletPage from '@/components/ui/wallet/WalletPage';
 import faviconUrl from '@/images/favicon-f169e2d8.png';
+import AdminPage from '@/components/ui/admin/AdminPage';
 
 // UI
 import { Toaster } from "@/components/ui/toaster"; // Importa el Toaster de shadcn
@@ -29,6 +30,7 @@ function App() {
   const isWeb = Capacitor.getPlatform() === 'web';
   const path = typeof window !== 'undefined' ? window.location.pathname : '/';
   const isPrivacyRoute = path === '/privacy';
+  const isAdminRoute = path === '/admin';
 
   // Configuración básica para apps móviles (ignorada en web)
   useEffect(() => {
@@ -95,7 +97,7 @@ function App() {
           `}</style>
         </Helmet>
         
-        {!isPrivacyRoute && user && (
+        {!isPrivacyRoute && !isAdminRoute && user && (
           <AppNavbar
             user={user}
             activeTab={activeTab}
@@ -104,75 +106,77 @@ function App() {
         )}
 
         {/* Spacer para compensar navbar fija */}
-        {!isPrivacyRoute && user && <div className="h-16 md:h-20" />}
+        {!isPrivacyRoute && !isAdminRoute && user && <div className="h-16 md:h-20" />}
 
         <main className="flex-grow flex flex-col items-center w-full">
-          {isPrivacyRoute ? (
+          {isAdminRoute ? (
+            <AdminPage isFirebaseConfigured={isFirebaseConfigured} adminEmail={user?.email || null} />
+          ) : isPrivacyRoute ? (
             <PrivacyPage />
           ) : (
-          <AnimatePresence mode="wait">
-            {!isFirebaseConfigured && (
-              <m.div
-                key="config-warning"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex-grow flex items-center justify-center p-6"
-              >
-                <div className="max-w-lg text-center space-y-3">
-                  <h2 className="text-xl font-bold">Configura Firebase</h2>
-                  <p className="text-white/80">
-                    Faltan variables de entorno. Crea un archivo <code>.env</code> en la raíz con las claves
-                    <code> VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID, VITE_FIREBASE_APP_ID</code>.
-                  </p>
-                  <p className="text-white/60">
-                    Tras guardarlo, reinicia el servidor de desarrollo.
-                  </p>
-                </div>
-              </m.div>
-            )}
-            {!authReady && (
-              <m.div
-                key="loader"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex-grow flex items-center justify-center"
-              >
-                <Loader2 className="w-12 h-12 text-boreal-aqua animate-spin" />
-              </m.div>
-            )}
+            <AnimatePresence mode="wait">
+              {!isFirebaseConfigured && (
+                <m.div
+                  key="config-warning"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-grow flex items-center justify-center p-6"
+                >
+                  <div className="max-w-lg text-center space-y-3">
+                    <h2 className="text-xl font-bold">Configura Firebase</h2>
+                    <p className="text-white/80">
+                      Faltan variables de entorno. Crea un archivo <code>.env</code> en la raíz con las claves
+                      <code> VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID, VITE_FIREBASE_APP_ID</code>.
+                    </p>
+                    <p className="text-white/60">
+                      Tras guardarlo, reinicia el servidor de desarrollo.
+                    </p>
+                  </div>
+                </m.div>
+              )}
+              {!authReady && (
+                <m.div
+                  key="loader"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-grow flex items-center justify-center"
+                >
+                  <Loader2 className="w-12 h-12 text-boreal-aqua animate-spin" />
+                </m.div>
+              )}
 
-            {authReady && isFirebaseConfigured && !user && (
-              <m.div
-                key="login"
-                initial={{ opacity: 0, y: 24, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -16, scale: 0.98 }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="w-full h-full flex"
-              >
-                <LoginPage />
-              </m.div>
-            )}
+              {authReady && isFirebaseConfigured && !user && (
+                <m.div
+                  key="login"
+                  initial={{ opacity: 0, y: 24, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -16, scale: 0.98 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  className="w-full h-full flex"
+                >
+                  <LoginPage />
+                </m.div>
+              )}
 
-            {authReady && isFirebaseConfigured && user && (
-              <m.div
-                key="wallet"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 16 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-                className="w-full h-full flex"
-              >
-                <WalletPage user={user} activeTab={activeTab} />
-              </m.div>
-            )}
-          </AnimatePresence>
+              {authReady && isFirebaseConfigured && user && (
+                <m.div
+                  key="wallet"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 16 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="w-full h-full flex"
+                >
+                  <WalletPage user={user} activeTab={activeTab} />
+                </m.div>
+              )}
+            </AnimatePresence>
           )}
         </main>
 
-  {!isPrivacyRoute && user && isWeb && <AppFooter />}
+  {!isPrivacyRoute && !isAdminRoute && user && isWeb && <AppFooter />}
         
         {/* El Toaster de shadcn/ui para las notificaciones */}
         <Toaster />

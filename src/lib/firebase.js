@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Importa las variables de entorno de Vite
 const firebaseConfig = {
@@ -30,12 +31,14 @@ let app = null;
 let auth = null;
 let db = null;
 let googleProvider = null;
+let storage = null;
 
 try {
   if (isFirebaseConfigured) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
+    storage = getStorage(app);
     googleProvider = new GoogleAuthProvider();
     try {
       // Sugerencias de UX: forzar selección de cuenta
@@ -57,4 +60,4 @@ try {
 // Habilitar logs de Firestore para debugging (opcional)
 // setLogLevel('debug');
 
-export { app, auth, db, googleProvider, isFirebaseConfigured };
+export { app, auth, db, storage, googleProvider, isFirebaseConfigured };
